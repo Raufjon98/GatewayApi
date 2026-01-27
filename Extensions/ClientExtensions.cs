@@ -1,4 +1,5 @@
 using CatalogService.MagicOnion.Interfaces;
+using CustomerApi.MagicOnion.Interfaces;
 using Grpc.Net.Client;
 using MagicOnion.Client;
 
@@ -19,6 +20,31 @@ public static class ClientExtensions
             });
             return channel;
         });
+        
+        var customerServiceUrl = configuration["Services:CustomerService:Url"] 
+                                ?? "https://localhost:5051";
+        
+        services.AddSingleton(provider =>
+        {
+            var channel = GrpcChannel.ForAddress(customerServiceUrl, new GrpcChannelOptions
+            {
+                HttpHandler = CreateHttpHandler()
+            });
+            return channel;
+        });
+        
+        services.AddSingleton<IAuthService>(provider =>
+        {
+            var channel = provider.GetRequiredService<GrpcChannel>();
+            return MagicOnionClient.Create<IAuthService>(channel);
+        });
+
+        services.AddSingleton<IUserService>(provider =>
+        {
+            var channel = provider.GetRequiredService<GrpcChannel>();
+            return MagicOnionClient.Create<IUserService>(channel);
+        });
+
         services.AddSingleton<IAddressService>(provider =>
         {
             var channel = provider.GetRequiredService<GrpcChannel>();
