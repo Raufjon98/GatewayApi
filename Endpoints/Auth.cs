@@ -1,10 +1,11 @@
+using System.Text.RegularExpressions;
 using ApiGateway.Extensions;
-using Contracts.Authorization.Requests;
-using Contracts.Authorization.Responses;
-using CustomerApi.MagicOnion.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
+using ApiGateway.Interfaces;
+using CustomerService.Contracts.Authorization.Requests;
+using CustomerService.Contracts.Authorization.Responses;
+using CustomerService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql.Replication.PgOutput.Messages;
+using PaymentService.Contracts.Interfaces;
 
 namespace ApiGateway.Endpoints;
 
@@ -16,6 +17,8 @@ public class Auth : EndpointGroupBase
         var group = app.MapGroup(Prefix);
         group.MapPost("/login", Login);
         group.MapPost("/register", Register);
+        group.MapPost("/logout", Logout).RequireAuthorization();
+        group.MapPost("/delete", DeleteAccount).RequireAuthorization();
     }
 
     public async Task<LoginResponse> Login([FromServices] IAuthService authService, [FromBody] LoginRequest request)
@@ -32,5 +35,30 @@ public class Auth : EndpointGroupBase
             return Results.BadRequest("Registration failed");
         }
         return Results.Ok("Customer registered successfully!");
+    }
+
+    public async Task<IResult> Logout([FromServices] IAuthService authService)
+    {
+        var result = await authService.LogoutAsync();
+        if (!result)
+        {
+            return Results.BadRequest("Logout failed");
+        }
+        return Results.Ok("Customer logged out");
+    }
+
+    public async Task<IResult> DeleteAccount([FromServices] IUser user,
+        [FromServices] IUserService userService)
+    {
+        if (string.IsNullOrWhiteSpace(user.Id))
+        {
+            return Results.BadRequest("Invalid customer Id");
+        }
+        var result = await userService.DeleteUserAsync(user.Id);
+        if (result)
+        {
+            return Results.Ok("Your account has been deleted");
+        }
+        return Results.BadRequest("Failed to delete account");
     }
 }

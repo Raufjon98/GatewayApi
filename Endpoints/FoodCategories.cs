@@ -1,6 +1,6 @@
 using ApiGateway.Extensions;
-using CatalogService.Contracts.DTOs;
-using CatalogService.MagicOnion.Interfaces;
+using CatalogService.Contracts.FoodCategory.Requests;
+using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -15,7 +15,7 @@ public class FoodCategories : EndpointGroupBase
         group.MapGet("/{foodCategoryId}", GetById);
         group.MapPost("/", Create);
         group.MapPut("/foodCategoryId", Update);
-        group.MapDelete("/foodCategoryId", Delete);
+        group.MapPost("/delete/foodCategoryId", Delete);
     }
 
     public async Task<IResult> GetAll([FromServices] IFoodCategoryService categoryService)
@@ -30,14 +30,14 @@ public class FoodCategories : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> Create([FromServices] IFoodCategoryService categoryService, [FromBody] CreateFoodCategoryDto foodCategory)
+    public async Task<IResult> Create([FromServices] IFoodCategoryService categoryService, [FromBody] CreateFoodCategoryRequest foodCategory)
     {
         var result = await categoryService.CreateFoodCategoryAsync(foodCategory);
         return Results.Ok(result);
     }
 
     public async Task<IResult> Update([FromServices] IFoodCategoryService categoryService,
-        [FromQuery] string foodCategoryId, [FromBody] CreateFoodCategoryDto foodCategory)
+        [FromQuery] string foodCategoryId, [FromBody] CreateFoodCategoryRequest foodCategory)
     {
         var result = await categoryService.UpdateFoodCategoryAsync(foodCategoryId, foodCategory);
         return Results.Ok(result);

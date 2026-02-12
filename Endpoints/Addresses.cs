@@ -1,7 +1,6 @@
 using ApiGateway.Extensions;
-using CatalogService.Contracts.DTOs;
-using CatalogService.Domain.Entities;
-using CatalogService.MagicOnion.Interfaces;
+using CatalogService.Contracts.Address.Requests;
+using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -16,7 +15,7 @@ public class Addresses : EndpointGroupBase
          group.MapGet("/{addressId}", GetById);
          group.MapPost("/", Create);
          group.MapPut("/{addressId}", Update);
-         group.MapDelete("/", Delete);
+         group.MapPost("/delete", Delete);
      }
      public async Task<IResult> GetAll([FromServices] IAddressService addressService)
      {
@@ -30,13 +29,13 @@ public class Addresses : EndpointGroupBase
          return Results.Ok(result);
      }
 
-     public async Task<IResult> Create([FromServices] IAddressService addressService, [FromBody] CreateAddressDto address)
+     public async Task<IResult> Create([FromServices] IAddressService addressService, [FromBody] CreateAddressRequest address)
      {
          var result = await addressService.CreateAddressAsync(address);
          return Results.Ok(result);
      }
 
-     public async Task<IResult> Update([FromServices] IAddressService addressService, [FromQuery]  string addressId, [FromBody] CreateAddressDto address)
+     public async Task<IResult> Update([FromServices] IAddressService addressService, [FromQuery]  string addressId, [FromBody] CreateAddressRequest address)
      {
          var result = await addressService.UpdateAddressAsync(addressId, address);
          return Results.Ok(result);

@@ -1,6 +1,7 @@
 using ApiGateway.Extensions;
-using Contracts.User.Requests;
-using CustomerApi.MagicOnion.Interfaces;
+using ApiGateway.Interfaces;
+using Customer.Contracts.User.Requests;
+using CustomerService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -15,7 +16,7 @@ public class Customers : EndpointGroupBase
         group.MapGet("/{customerId}", GetCustomer);
         group.MapPut("/{customerId}", UpdateCustomer);
         group.MapPut("/updatePassword/{customerId}", UpdateCustomerPassword);
-        group.MapDelete("/{customerId}", DeleteCustomer);
+        group.MapPut("/delete", DeleteCustomer).RequireAuthorization();
     }
 
     public async Task<IResult> GetCustomers([FromServices] IUserService userService)
@@ -49,9 +50,13 @@ public class Customers : EndpointGroupBase
     }
 
     public async Task<IResult> DeleteCustomer([FromServices] IUserService userService,
-        [FromRoute] string customerId)
+        [FromServices] IUser user)
     {
-        var result = await userService.DeleteUserAsync(customerId);
+        if (string.IsNullOrWhiteSpace(user.Id))
+        {
+            return Results.BadRequest("Invalid customerId");
+        }
+        await userService.DeleteUserAsync(user.Id);
         return Results.Ok("Customer was deleted successfully!");
     }
 }

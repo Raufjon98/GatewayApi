@@ -1,6 +1,6 @@
 using ApiGateway.Extensions;
-using CatalogService.Contracts.DTOs;
-using CatalogService.MagicOnion.Interfaces;
+using CatalogService.Contracts.Interfaces;
+using CatalogService.Contracts.Restaurant.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -23,7 +23,7 @@ public class Restaurants : EndpointGroupBase
         group.MapPut("/{restaurantId}", Update);
         group.MapPut("/update-availability/{restaurantId}/{isAvailable}", UpdateAvailability);
         group.MapPut("/update-category/{restaurantId}/{categoryId}", UpdateCategory);
-        group.MapDelete("/{RestaurantId}", Delete);
+        group.MapPost("/delete/{restaurantId}", Delete);
         group.MapDelete("/", DeleteInActives);
     }
 
@@ -79,14 +79,14 @@ public class Restaurants : EndpointGroupBase
     }
 
     public async Task<IResult> Create([FromServices] IRestaurantService restaurantService,
-        [FromBody] CreateRestaurantDto restaurant)
+        [FromBody] CreateRestaurantRequest restaurant)
     {
         var result = await restaurantService.CreateRestaurantAsync(restaurant);
         return Results.Ok(result);
     }
 
     public async Task<IResult> Update([FromServices] IRestaurantService restaurantService,
-        [FromBody] CreateRestaurantDto restaurant, [FromQuery] string restaurantId)
+        [FromBody] CreateRestaurantRequest restaurant, [FromQuery] string restaurantId)
     {
         var result = await restaurantService.UpdateRestaurantAsync(restaurantId, restaurant);
         return Results.Ok(result);
