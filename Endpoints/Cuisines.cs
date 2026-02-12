@@ -1,6 +1,6 @@
 using ApiGateway.Extensions;
-using CatalogService.Contracts.DTOs;
-using CatalogService.MagicOnion.Interfaces;
+using CatalogService.Contracts.Cuisine.Requests;
+using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -15,7 +15,7 @@ public class Cuisines : EndpointGroupBase
         group.MapGet("/{cuisineId}", GetById);
         group.MapPost("/", Create);
         group.MapPut("/{cuisineId}", Update);
-        group.MapDelete("/{cuisineId}", Delete);
+        group.MapPost("/delete/{cuisineId}", Delete);
     }
 
     public async Task<IResult> GetAll([FromServices] ICuisineService  cuisineService)
@@ -31,14 +31,14 @@ public class Cuisines : EndpointGroupBase
     }
 
     public async Task<IResult> Create([FromServices] ICuisineService cuisineService,
-        [FromBody] CreateCuisineDto cuisine)
+        [FromBody] CreateCuisineRequest cuisine)
     {
         var result = await cuisineService.CreateCuisineAsync(cuisine);
         return Results.Ok(result);
     }
 
     public async Task<IResult> Update([FromServices] ICuisineService cuisineService, [FromQuery] string id,
-        [FromBody] CreateCuisineDto cuisine)
+        [FromBody] CreateCuisineRequest cuisine)
     {
         var result = await cuisineService.UpdateCuisineAsync(id, cuisine);
         return Results.Ok(result);

@@ -1,6 +1,6 @@
 using ApiGateway.Extensions;
-using CatalogService.Contracts.DTOs;
-using CatalogService.MagicOnion.Interfaces;
+using CatalogService.Contracts.Food.Requests;
+using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiGateway.Endpoints;
@@ -19,7 +19,7 @@ public class Foods : EndpointGroupBase
         group.MapPost("/", Create);
         group.MapPut("/{foodId}", Update);
         group.MapPut("/{foodId}/{isAvailable}", UpdateAvailability);
-        group.MapDelete("/{foodId}", Delete);
+        group.MapPost("/delete/{foodId}", Delete);
     }
 
     public async Task<IResult> GetAll([FromServices] IFoodService foodService)
@@ -34,14 +34,14 @@ public class Foods : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> Create([FromServices] IFoodService foodService, [FromBody] CreateFoodDto food)
+    public async Task<IResult> Create([FromServices] IFoodService foodService, [FromBody] CreateFoodRequest food)
     {
         var result = await foodService.CreateFoodAsync(food);
         return Results.Ok(result);
     }
 
     public async Task<IResult> Update([FromServices] IFoodService foodService, [FromQuery] string foodId,
-        [FromBody] CreateFoodDto food)
+        [FromBody] CreateFoodRequest food)
     {
         var result = await foodService.UpdateFoodAsync(foodId, food);
         return Results.Ok(result);
@@ -73,10 +73,9 @@ public class Foods : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> GetByRestaurant([FromQuery] string restaurantId, [FromServices] IFoodService foodService)
+    public async Task<IResult> GetByRestaurant([FromRoute] string restaurantId, [FromServices] IFoodService foodService)
     {
         var result = await foodService.GetFoodsByRestaurantAsync(restaurantId);
         return Results.Ok(result);
     }
-    
 }
