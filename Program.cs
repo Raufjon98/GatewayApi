@@ -1,14 +1,17 @@
+using ApiGateway.Consumers.Accounts;
 using ApiGateway.Extensions;
 using ApiGateway.Interfaces;
 using ApiGateway.Middleware;
 using ApiGateway.Services;
 using CatalogService.Contracts.Extensions;
 using CustomerService.Contracts.Extensions;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrderService.Contracts.Extensions;
 using PaymentService.Contracts.Extentions;
+using RabbitMQ.Client;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +90,22 @@ builder.Services.AddPaymentServiceContracts();
 builder.Services.AddOrderServiceContracts();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUser, CurrentUser>();
+
+var rabbitConnectionString = builder.Configuration["MessageBroker:Host"];
+
+builder.Services.AddMassTransit(configuration =>
+{
+    configuration.AddConsumer<AccountCreatedConsumer>();
+    configuration.AddConsumer<AccountDeletedConsumer>();
+    configuration.AddConsumer<AccountUpdatedConsumer>();
+   
+    configuration.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(rabbitConnectionString);
+        cfg.ExchangeType = ExchangeType.Fanout;
+        cfg.ConfigureEndpoints(ctx);
+    });
+});
 
 var app = builder.Build();
 
