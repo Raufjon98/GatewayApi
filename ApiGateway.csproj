@@ -19,7 +19,8 @@
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
-    <PackageReference Include="OrderService.Contracts" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
+    <PackageReference Include="OrderService.Contracts" Version="1.2.1" />
     <PackageReference Include="PaymentService.Contracts" Version="1.0.6" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.8" />
   </ItemGroup>

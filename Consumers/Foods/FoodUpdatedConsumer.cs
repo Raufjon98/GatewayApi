@@ -1,20 +1,21 @@
 using CatalogService.Contracts.Food.Events;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Foods;
 
 public class FoodUpdatedConsumer : IConsumer<FoodUpdatedEvent>
 {
-    private readonly ILogger<FoodUpdatedConsumer> _logger;
+    private readonly IDistributedCache _cache;
 
-    public FoodUpdatedConsumer(ILogger<FoodUpdatedConsumer> logger)
+    public FoodUpdatedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<FoodUpdatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received FoodUpdatedEvent {@Message}", message);
+        var key = $"food:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

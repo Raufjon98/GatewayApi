@@ -98,6 +98,11 @@ builder.Services.AddPaymentServiceContracts();
 builder.Services.AddOrderServiceContracts();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUser, CurrentUser>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var connectionstring = builder.Configuration["ConnectionStrings:Redis"];
+    options.Configuration = connectionstring;
+});
 
 var rabbitConnectionString = builder.Configuration["MessageBroker:Host"];
 

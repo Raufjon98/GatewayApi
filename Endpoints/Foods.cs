@@ -1,7 +1,10 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using CatalogService.Contracts.Food.Requests;
+using CatalogService.Contracts.Food.Responses;
 using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Endpoints;
 
@@ -28,9 +31,24 @@ public class Foods : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> GetById([FromServices] IFoodService foodService, [FromQuery] string foodId)
+    public async Task<IResult> GetById(
+        [FromServices] IFoodService foodService, 
+        [FromServices] IDistributedCache cache, 
+        [FromQuery] string foodId)
     {
+        var key = $"food:{foodId}";
+        var cached = await cache.GetStringAsync(key);
+        if (cached is not null)
+        {
+            return Results.Ok(JsonSerializer.Deserialize<FoodResponse>(cached));
+        }
+            
         var result = await foodService.GetFoodAsync(foodId);
+        await cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
         return Results.Ok(result);
     }
 

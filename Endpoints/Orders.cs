@@ -1,10 +1,14 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using ApiGateway.Interfaces;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using OrderService.Contracts.Enums;
 using OrderService.Contracts.Interfaces;
 using OrderService.Contracts.Order.Requests;
+using OrderService.Contracts.Order.Responses;
+using StackExchange.Redis;
 
 namespace ApiGateway.Endpoints;
 
@@ -111,7 +115,9 @@ public class Orders : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> GetById([FromServices] IOrderService orderService,
+    public async Task<IResult> GetById(
+        [FromServices] IOrderService orderService,
+        [FromServices] IDistributedCache cache,
         [FromServices] IUser user,
         [FromRoute] string orderId)
     {
@@ -124,8 +130,20 @@ public class Orders : EndpointGroupBase
         {
             return Results.BadRequest("Invalid orderId");
         }
-
+        var key = $"order:{orderId}";
+        var cached = await cache.GetStringAsync(key);
+        if (cached is not null)
+        {
+            return Results.Ok(JsonSerializer.Deserialize<OrderResponse>(cached));
+        }
         var result = await orderService.GetOrderAsync(customerId, id);
+        
+        await cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
+        
         return Results.Ok(result);
     }
 

@@ -1,14 +1,18 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using ApiGateway.Interfaces;
 using Customer.Contracts.User.Requests;
+using Customer.Contracts.User.Responses;
 using CustomerService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Endpoints;
 
 public class Customers : EndpointGroupBase
 {
-   public override string Prefix => "customers";
+    public override string Prefix => "customers";
+
     public override void Map(WebApplication app)
     {
         var group = app.MapGroup(Prefix);
@@ -24,14 +28,31 @@ public class Customers : EndpointGroupBase
         var resuls = await userService.GetUsersAsync();
         return Results.Ok(resuls);
     }
-    public async Task<IResult> GetCustomer([FromServices] IUserService userService, string customerId)
+
+    public async Task<IResult> GetCustomer(
+        [FromServices] IUserService userService,
+        [FromServices] IDistributedCache cache,
+        string customerId)
     {
-        var result = await userService.GetUserAsync(customerId);
-        if (result == null)
+        var key = $"user:{customerId}";
+
+        var cached = await cache.GetStringAsync(key);
+        if (cached != null)
         {
-            return Results.NotFound();
+            return Results.Ok(JsonSerializer.Deserialize<UserResponse>(cached));
         }
-        return Results.Ok(result);
+
+        var user = await userService.GetUserAsync(customerId);
+
+        await cache.SetStringAsync(
+            key,
+            JsonSerializer.Serialize(user),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            });
+
+        return Results.Ok(user);
     }
 
     public async Task<IResult> UpdateCustomer([FromServices] IUserService userService,
@@ -43,7 +64,7 @@ public class Customers : EndpointGroupBase
     }
 
     public async Task<IResult> UpdateCustomerPassword([FromServices] IUserService userService,
-        [FromRoute] string customerId, UpdateUserPasswordRequest request )
+        [FromRoute] string customerId, UpdateUserPasswordRequest request)
     {
         var result = await userService.UpdateUserPassword(customerId, request.OldPassword, request.NewPassword);
         return Results.Ok(result);
@@ -56,6 +77,7 @@ public class Customers : EndpointGroupBase
         {
             return Results.BadRequest("Invalid customerId");
         }
+
         await userService.DeleteUserAsync(user.Id);
         return Results.Ok("Customer was deleted successfully!");
     }

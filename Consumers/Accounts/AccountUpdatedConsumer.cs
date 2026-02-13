@@ -1,20 +1,21 @@
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 using PaymentService.Contracts.Account.Events;
 
 namespace ApiGateway.Consumers.Accounts;
 
 public class AccountUpdatedConsumer : IConsumer<AccountUpdatedEvent>
 {
-    private readonly ILogger<AccountUpdatedConsumer> _logger;
+    private readonly IDistributedCache _cache;
 
-    public AccountUpdatedConsumer(ILogger<AccountUpdatedConsumer> logger)
+    public AccountUpdatedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<AccountUpdatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received AccountUpdatedEvent {@Message}", message);
+        var key = $"account:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

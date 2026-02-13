@@ -1,7 +1,10 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using CatalogService.Contracts.Interfaces;
 using CatalogService.Contracts.Restaurant.Requests;
+using CatalogService.Contracts.Restaurant.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Endpoints;
 
@@ -33,9 +36,24 @@ public class Restaurants : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> GetById([FromServices] IRestaurantService restaurantService, [FromQuery] string id)
+    public async Task<IResult> GetById(
+        [FromServices] IRestaurantService restaurantService,
+        [FromServices] IDistributedCache cache,
+        [FromQuery] string id)
     {
+        var key = $"restaurants:{id}";
+        var cached = await cache.GetStringAsync(key);
+        if (cached != null)
+        {
+            return Results.Ok(JsonSerializer.Deserialize<RestaurantResponse>(cached));
+        }
+        
         var result = await restaurantService.GetRestaurantAsync(id);
+        await cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
         return Results.Ok(result);
     }
 

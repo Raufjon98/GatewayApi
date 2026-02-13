@@ -1,20 +1,20 @@
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 using OrderService.Contracts.Cart.Events;
 
 namespace ApiGateway.Consumers.Carts;
 
 public class CartUpdatedConsumer : IConsumer<CartUpdatedEvent>
 {
-    private readonly ILogger<CartUpdatedConsumer> _logger;
-
-    public CartUpdatedConsumer(ILogger<CartUpdatedConsumer> logger)
+    private readonly IDistributedCache _cache;
+    public CartUpdatedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<CartUpdatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received CartUpdatedEvent {@Message}", message);
+        var key =  $"cart:{context.Message.CustomerId}";
+        await _cache.RemoveAsync(key);
     }
 }

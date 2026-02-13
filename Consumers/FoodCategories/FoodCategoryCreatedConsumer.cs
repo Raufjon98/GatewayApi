@@ -1,20 +1,31 @@
+using System.Text.Json;
 using CatalogService.Contracts.FoodCategory.Events;
+using CatalogService.Contracts.Interfaces;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.FoodCategories;
 
 public class FoodCategoryCreatedConsumer : IConsumer<FoodCategoryCreatedEvent>
 {
-    private readonly ILogger<FoodCategoryCreatedConsumer> _logger;
+    private readonly IFoodCategoryService _categoryService;
+    private readonly IDistributedCache _cache;
 
-    public FoodCategoryCreatedConsumer(ILogger<FoodCategoryCreatedConsumer> logger)
+    public FoodCategoryCreatedConsumer(IFoodCategoryService categoryService, IDistributedCache cache)
     {
-        _logger = logger;
+        _categoryService = categoryService;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<FoodCategoryCreatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received FoodCategoryCreatedEvent {@Message}", message);
+        var key = $"foodCategory:{context.Message.Id}";
+        var foodcategory = await _categoryService.GetFoodCategoryAsync(context.Message.Id);
+        await _cache.SetStringAsync(key,
+            JsonSerializer.Serialize(foodcategory),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(10)
+            });
     }
 }

@@ -1,20 +1,20 @@
 using CustomerService.Contracts.User.Events;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Users;
 
 public class UserUpdatedConsumer : IConsumer<UserUpdatedEvent>
 {
-    private readonly ILogger<UserUpdatedConsumer> _logger;
-
-    public UserUpdatedConsumer(ILogger<UserUpdatedConsumer> logger)
+    private readonly IDistributedCache _cache;
+    public UserUpdatedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<UserUpdatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received UserUpdatedEvent {@Message}", message);
+        var  key = $"user:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

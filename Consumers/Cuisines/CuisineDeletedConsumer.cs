@@ -1,20 +1,21 @@
 using CatalogService.Contracts.Cuisine.Events;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Cuisines;
 
 public class CuisineDeletedConsumer : IConsumer<CuisineDeletedEvent>
 {
-    private readonly ILogger<CuisineDeletedConsumer> _logger;
+    private readonly IDistributedCache _cache;
 
-    public CuisineDeletedConsumer(ILogger<CuisineDeletedConsumer> logger)
+    public CuisineDeletedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<CuisineDeletedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received CuisineDeletedEvent {@Message}", message);
+        var key = $"cuisine:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

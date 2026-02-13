@@ -1,20 +1,30 @@
+using System.Text.Json;
 using CatalogService.Contracts.Food.Events;
+using CatalogService.Contracts.Interfaces;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Foods;
 
 public class FoodCreatedConsumer : IConsumer<FoodCreatedEvent>
 {
-    private readonly ILogger<FoodCreatedConsumer> _logger;
+    private readonly IDistributedCache _cache;
+    private readonly IFoodService _foodService;
 
-    public FoodCreatedConsumer(ILogger<FoodCreatedConsumer> logger)
+    public FoodCreatedConsumer(IDistributedCache cache, IFoodService foodService)
     {
-        _logger = logger;
+        _cache = cache;
+        _foodService = foodService;
     }
 
     public async Task Consume(ConsumeContext<FoodCreatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received FoodCreatedEvent {@Message}", message);
+        var key = $"food:{context.Message.Id}";
+        var food = await _foodService.GetFoodAsync(context.Message.Id);
+        await _cache.SetStringAsync(key, JsonSerializer.Serialize(food),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
     }
 }
