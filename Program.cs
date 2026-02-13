@@ -1,4 +1,12 @@
 using ApiGateway.Consumers.Accounts;
+using ApiGateway.Consumers.Addresses;
+using ApiGateway.Consumers.Carts;
+using ApiGateway.Consumers.Categories;
+using ApiGateway.Consumers.Cuisines;
+using ApiGateway.Consumers.FoodCategories;
+using ApiGateway.Consumers.Foods;
+using ApiGateway.Consumers.Restaurants;
+using ApiGateway.Consumers.Users;
 using ApiGateway.Extensions;
 using ApiGateway.Interfaces;
 using ApiGateway.Middleware;
@@ -98,7 +106,31 @@ builder.Services.AddMassTransit(configuration =>
     configuration.AddConsumer<AccountCreatedConsumer>();
     configuration.AddConsumer<AccountDeletedConsumer>();
     configuration.AddConsumer<AccountUpdatedConsumer>();
-   
+    configuration.AddConsumer<AddressUpdatedConsumer>();
+    configuration.AddConsumer<AddressCreatedConsumer>();
+    configuration.AddConsumer<AddressDeletedConsumer>();
+    configuration.AddConsumer<CartCreatedConsumer>();
+    configuration.AddConsumer<CartDeletedConsumer>();
+    configuration.AddConsumer<CartUpdatedConsumer>();
+    configuration.AddConsumer<CategoryCreatedConsumer>();
+    configuration.AddConsumer<CategoryDeletedConsumer>();
+    configuration.AddConsumer<CategoryUpdatedConsumer>();
+    configuration.AddConsumer<CuisineCreatedConsumer>();
+    configuration.AddConsumer<CuisineDeletedConsumer>();
+    configuration.AddConsumer<CuisineUpdatedConsumer>();
+    configuration.AddConsumer<FoodCategoryCreatedConsumer>();
+    configuration.AddConsumer<FoodCategoryDeletedConsumer>();
+    configuration.AddConsumer<FoodCategoryUpdatedConsumer>();
+    configuration.AddConsumer<FoodCreatedConsumer>();
+    configuration.AddConsumer<FoodDeletedConsumer>();
+    configuration.AddConsumer<FoodUpdatedConsumer>();
+    configuration.AddConsumer<RestaurantCreatedConsumer>();
+    configuration.AddConsumer<RestaurantDeletedConsumer>();
+    configuration.AddConsumer<RestaurantUpdatedConsumer>();
+    configuration.AddConsumer<RegisteredConsumer>();
+    configuration.AddConsumer<UserUpdatedConsumer>();
+    configuration.AddConsumer<UserDeletedConsumer>();
+    
     configuration.UsingRabbitMq((ctx, cfg) =>
     {
         cfg.Host(rabbitConnectionString);
