@@ -1,14 +1,25 @@
+using ApiGateway.Consumers.Accounts;
+using ApiGateway.Consumers.Addresses;
+using ApiGateway.Consumers.Carts;
+using ApiGateway.Consumers.Categories;
+using ApiGateway.Consumers.Cuisines;
+using ApiGateway.Consumers.FoodCategories;
+using ApiGateway.Consumers.Foods;
+using ApiGateway.Consumers.Restaurants;
+using ApiGateway.Consumers.Users;
 using ApiGateway.Extensions;
 using ApiGateway.Interfaces;
 using ApiGateway.Middleware;
 using ApiGateway.Services;
 using CatalogService.Contracts.Extensions;
 using CustomerService.Contracts.Extensions;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrderService.Contracts.Extensions;
 using PaymentService.Contracts.Extentions;
+using RabbitMQ.Client;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +98,46 @@ builder.Services.AddPaymentServiceContracts();
 builder.Services.AddOrderServiceContracts();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUser, CurrentUser>();
+
+var rabbitConnectionString = builder.Configuration["MessageBroker:Host"];
+
+builder.Services.AddMassTransit(configuration =>
+{
+    configuration.AddConsumer<AccountCreatedConsumer>();
+    configuration.AddConsumer<AccountDeletedConsumer>();
+    configuration.AddConsumer<AccountUpdatedConsumer>();
+    configuration.AddConsumer<AddressUpdatedConsumer>();
+    configuration.AddConsumer<AddressCreatedConsumer>();
+    configuration.AddConsumer<AddressDeletedConsumer>();
+    configuration.AddConsumer<CartCreatedConsumer>();
+    configuration.AddConsumer<CartDeletedConsumer>();
+    configuration.AddConsumer<CartUpdatedConsumer>();
+    configuration.AddConsumer<CategoryCreatedConsumer>();
+    configuration.AddConsumer<CategoryDeletedConsumer>();
+    configuration.AddConsumer<CategoryUpdatedConsumer>();
+    configuration.AddConsumer<CuisineCreatedConsumer>();
+    configuration.AddConsumer<CuisineDeletedConsumer>();
+    configuration.AddConsumer<CuisineUpdatedConsumer>();
+    configuration.AddConsumer<FoodCategoryCreatedConsumer>();
+    configuration.AddConsumer<FoodCategoryDeletedConsumer>();
+    configuration.AddConsumer<FoodCategoryUpdatedConsumer>();
+    configuration.AddConsumer<FoodCreatedConsumer>();
+    configuration.AddConsumer<FoodDeletedConsumer>();
+    configuration.AddConsumer<FoodUpdatedConsumer>();
+    configuration.AddConsumer<RestaurantCreatedConsumer>();
+    configuration.AddConsumer<RestaurantDeletedConsumer>();
+    configuration.AddConsumer<RestaurantUpdatedConsumer>();
+    configuration.AddConsumer<RegisteredConsumer>();
+    configuration.AddConsumer<UserUpdatedConsumer>();
+    configuration.AddConsumer<UserDeletedConsumer>();
+    
+    configuration.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(rabbitConnectionString);
+        cfg.ExchangeType = ExchangeType.Fanout;
+        cfg.ConfigureEndpoints(ctx);
+    });
+});
 
 var app = builder.Build();
 
