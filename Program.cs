@@ -5,6 +5,7 @@ using ApiGateway.Consumers.Categories;
 using ApiGateway.Consumers.Cuisines;
 using ApiGateway.Consumers.FoodCategories;
 using ApiGateway.Consumers.Foods;
+using ApiGateway.Consumers.Orders;
 using ApiGateway.Consumers.Restaurants;
 using ApiGateway.Consumers.Users;
 using ApiGateway.Extensions;
@@ -115,7 +116,7 @@ builder.Services.AddMassTransit(configuration =>
     configuration.AddConsumer<AddressCreatedConsumer>();
     configuration.AddConsumer<AddressDeletedConsumer>();
     configuration.AddConsumer<CartCreatedConsumer>();
-    configuration.AddConsumer<CartDeletedConsumer>();
+    configuration.AddConsumer<CartRemovedConsumer>();
     configuration.AddConsumer<CartUpdatedConsumer>();
     configuration.AddConsumer<CategoryCreatedConsumer>();
     configuration.AddConsumer<CategoryDeletedConsumer>();
@@ -129,6 +130,9 @@ builder.Services.AddMassTransit(configuration =>
     configuration.AddConsumer<FoodCreatedConsumer>();
     configuration.AddConsumer<FoodDeletedConsumer>();
     configuration.AddConsumer<FoodUpdatedConsumer>();
+    configuration.AddConsumer<OrderCreatedConsumer>();
+    configuration.AddConsumer<OrderUpdatedConsumer>();
+    configuration.AddConsumer<OrderStatusChangedConsumer>();
     configuration.AddConsumer<RestaurantCreatedConsumer>();
     configuration.AddConsumer<RestaurantDeletedConsumer>();
     configuration.AddConsumer<RestaurantUpdatedConsumer>();
