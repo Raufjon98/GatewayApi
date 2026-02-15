@@ -1,7 +1,10 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using CatalogService.Contracts.Address.Requests;
+using CatalogService.Contracts.Address.Resposes;
 using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Endpoints;
 
@@ -23,9 +26,25 @@ public class Addresses : EndpointGroupBase
          return Results.Ok(result);
      }
 
-     public async Task<IResult> GetById([FromServices] IAddressService addressService, [FromQuery] string addressId)
+     public async Task<IResult> GetById(
+         [FromServices] IAddressService addressService,
+         [FromServices] IDistributedCache cache,
+         [FromQuery] string addressId)
      {
+         var key = $"address:{addressId}";
+         var cachced = await cache.GetStringAsync(key);
+         if (cachced != null)
+         {
+             return Results.Ok(JsonSerializer.Deserialize<AddressResponse>(cachced));
+         }
+         
          var result = await addressService.GetAddressAsync(addressId);
+         await cache.SetStringAsync(key,
+             JsonSerializer.Serialize(result),
+             new DistributedCacheEntryOptions
+             {
+                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+             });
          return Results.Ok(result);
      }
 

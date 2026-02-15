@@ -1,20 +1,23 @@
+using System.Text.Json;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 using PaymentService.Contracts.Account.Events;
+using PaymentService.Contracts.Interfaces;
 
 namespace ApiGateway.Consumers.Accounts;
 
 public class AccountCreatedConsumer : IConsumer<AccountCreatedEvent>
 {
-    private readonly ILogger<AccountCreatedConsumer> _logger;
-
-    public AccountCreatedConsumer(ILogger<AccountCreatedConsumer> logger)
+    private readonly IDistributedCache _cache;
+    private readonly IAccountService _accountService;
+    public AccountCreatedConsumer(IDistributedCache cache, IAccountService accountService)
     {
-        _logger = logger;
+        _cache = cache;
+        _accountService = accountService;
     }
 
     public async Task Consume(ConsumeContext<AccountCreatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received AccountCreatedEvent {@Message}", message);
+        var key = $"user:{context.Message.Id}";
     }
 }

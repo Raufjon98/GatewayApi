@@ -1,20 +1,20 @@
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 using PaymentService.Contracts.Account.Events;
 
 namespace ApiGateway.Consumers.Accounts;
 
 public class AccountDeletedConsumer : IConsumer<AccountDeletedEvent>
 {
-    private readonly ILogger<AccountDeletedConsumer> _logger;
-
-    public AccountDeletedConsumer(ILogger<AccountDeletedConsumer> logger)
+    private readonly IDistributedCache _cache;
+    public AccountDeletedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<AccountDeletedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received AccountDeletedEvent {@Message}", message);
+        var key = $"account:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

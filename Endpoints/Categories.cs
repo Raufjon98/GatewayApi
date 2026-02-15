@@ -1,7 +1,10 @@
+using System.Text.Json;
 using ApiGateway.Extensions;
 using CatalogService.Contracts.Category.Requests;
+using CatalogService.Contracts.Category.Responses;
 using CatalogService.Contracts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Endpoints;
 
@@ -25,9 +28,25 @@ public class Categories : EndpointGroupBase
         return Results.Ok(result);
     }
 
-    public async Task<IResult> GetById([FromServices] ICategoryService categoryService, [FromRoute] string categoryId)
+    public async Task<IResult> GetById(
+        [FromServices] ICategoryService categoryService,
+        [FromServices] IDistributedCache cache,
+        [FromRoute] string categoryId)
     {
+        var key = $"category:{categoryId}";
+        var cached = await cache.GetStringAsync(key);
+        if (cached != null)
+        {
+            return Results.Ok(JsonSerializer.Deserialize<CategoryResponse>(cached));
+        }
+        
         var result = await categoryService.GetCategoryAsync(categoryId);
+        await cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
+        
         return Results.Ok(result);
     }
 

@@ -1,20 +1,21 @@
 using CatalogService.Contracts.Address.Events;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Addresses;
 
 public class AddressUpdatedConsumer : IConsumer<AddressUpdatedEvent>
 {
-    private readonly ILogger<AddressUpdatedConsumer> _logger;
+    private readonly IDistributedCache _cache;
 
-    public AddressUpdatedConsumer(ILogger<AddressUpdatedConsumer> logger)
+    public AddressUpdatedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<AddressUpdatedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received AddressUpdatedEvent {@Message}", message);
+        var key = $"address:{context.Message.Id}";
+        await _cache.RemoveAsync(key);
     }
 }

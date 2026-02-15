@@ -4,17 +4,18 @@ using OrderService.Contracts.Cart.Events;
 
 namespace ApiGateway.Consumers.Carts;
 
-public class CartUpdatedConsumer : IConsumer<CartUpdatedEvent>
+public class CartRemovedConsumer : IConsumer<CartRemovedEvent>
 {
     private readonly IDistributedCache _cache;
-    public CartUpdatedConsumer(IDistributedCache cache)
+
+    public CartRemovedConsumer(IDistributedCache cache)
     {
         _cache = cache;
     }
 
-    public async Task Consume(ConsumeContext<CartUpdatedEvent> context)
+    public async Task Consume(ConsumeContext<CartRemovedEvent> context)
     {
-        var key =  $"cart:{context.Message.CustomerId}";
+        var key = $"cart:{context.Message.CustomerId}";
         await _cache.RemoveAsync(key);
     }
 }

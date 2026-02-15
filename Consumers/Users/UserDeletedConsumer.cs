@@ -1,20 +1,21 @@
 using CustomerService.Contracts.User.Events;
 using MassTransit;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ApiGateway.Consumers.Users;
 
 public class UserDeletedConsumer : IConsumer<UserDeletedEvent>
 {
-    private readonly ILogger<UserDeletedConsumer> _logger;
+    private readonly IDistributedCache _cache;
 
-    public UserDeletedConsumer(ILogger<UserDeletedConsumer> logger)
+    public UserDeletedConsumer(IDistributedCache cache)
     {
-        _logger = logger;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<UserDeletedEvent> context)
     {
-        var message = context.Message;
-        _logger.LogInformation("Received UserDeletedEvent {@Message}", message);
+       var key = $"user:{context.Message.Id}";
+       await _cache.RemoveAsync(key);
     }
 }
