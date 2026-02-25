@@ -24,7 +24,7 @@ public class CategoryCreatedConsumer : IConsumer<CategoryCreatedEvent>
             JsonSerializer.Serialize(category),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(12)
             });
     }
 }

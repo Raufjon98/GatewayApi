@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CatalogService.Contracts" Version="1.0.8" />
-    <PackageReference Include="CustomerService.Contracts" Version="1.0.4" />
+    <PackageReference Include="CustomerService.Contracts" Version="1.0.5" />
     <PackageReference Include="Google.Protobuf" Version="3.33.4" />
     <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
     <PackageReference Include="Grpc.Tools" Version="2.76.0">
@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
     <PackageReference Include="OrderService.Contracts" Version="1.2.1" />
-    <PackageReference Include="PaymentService.Contracts" Version="1.0.6" />
+    <PackageReference Include="PaymentService.Contracts" Version="1.0.8" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.12.8" />
   </ItemGroup>
 </Project>

@@ -29,7 +29,7 @@ public class RestaurantCreatedConsumer : IConsumer<RestaurantCreatedEvent>
             JsonSerializer.Serialize(restaurant),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(3)
             });
     }
 }

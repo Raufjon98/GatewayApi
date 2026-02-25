@@ -25,7 +25,7 @@ public record OrderCreatedConsumer :  IConsumer<OrderCreatedEvent>
             JsonSerializer.Serialize(order),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
     }
 }
