@@ -121,7 +121,7 @@ public class Accounts : EndpointGroupBase
             return Results.BadRequest("Invalid customerId");
         }
         
-        var result = await accountService.GetCustomerWithdrasAsync(customerId);
+        var result = await accountService.GetCustomerWithdrawsAsync(customerId);
         return Results.Ok(result);
     }
 

@@ -157,8 +157,8 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler(); // Handles unhandled exceptions
-    app.UseStatusCodePages(); // Ensures body for non-success status codes
+    app.UseExceptionHandler(); 
+    app.UseStatusCodePages();
 }
 
 app.UseHttpsRedirection();

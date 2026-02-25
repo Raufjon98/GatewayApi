@@ -24,7 +24,7 @@ public class CuisineCreatedConsumer : IConsumer<CuisineCreatedEvent>
             JsonSerializer.Serialize(cuisine),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(10)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(12)
             });
     }
 }

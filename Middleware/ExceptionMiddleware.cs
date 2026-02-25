@@ -25,13 +25,22 @@ public class ExceptionMiddleware
             if (e.StatusCode == StatusCode.NotFound)
             {
                 problemDetails.Status = StatusCodes.Status404NotFound;
-                problemDetails.Title = "Object not found error";
+                problemDetails.Title = "Object Not Found";
                 problemDetails.Detail = e.Message;
             }else if (e.StatusCode == StatusCode.AlreadyExists)
             {
                 problemDetails.Status = StatusCodes.Status409Conflict;
-                problemDetails.Title = "Object already exists";
+                problemDetails.Title = "Object Already Exists";
                 problemDetails.Detail = e.Message;
+            }
+            else if (e.StatusCode == StatusCode.InvalidArgument)
+            {
+                foreach (var entry in e.Trailers)
+                {
+                    problemDetails.Status = StatusCodes.Status400BadRequest;
+                    problemDetails.Title = "Validation Failed";
+                    problemDetails.Detail = entry.Value;
+                }
             }
             else
             {
@@ -39,7 +48,7 @@ public class ExceptionMiddleware
                 problemDetails.Title = "Internal Server Error";
                 problemDetails.Detail = e.Message;
             }
-            context.Response.StatusCode = problemDetails.Status.Value;
+            context.Response.StatusCode = problemDetails.Status!.Value;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
         }

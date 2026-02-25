@@ -25,7 +25,7 @@ public class CartCreatedConsumer : IConsumer<CartCreatedEvent>
            JsonSerializer.Serialize(cart),
            new DistributedCacheEntryOptions
            {
-               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
            });
     }
 }
